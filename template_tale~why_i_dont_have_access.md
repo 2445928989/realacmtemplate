@@ -431,6 +431,55 @@ for (int d = 0; d <= D; d++) {
     }
 ```
 
+###### 数位dp
+
+example:windy数
+
+求[l,r]中相邻两位数之差>=2的数
+
+```cpp
+vector<int> v;
+vector<vector<vector<int>>> dp(20, vector<vector<int>>(10, vector<int>(2, -1)));
+// pos:当前考虑位
+// limit:是否贴上届
+// lead:上一位是否是前导零
+// pre:上一位数字是多少
+int dfs(int pos, bool limit, bool lead, int pre)
+{
+    if (pos < 0)
+        return 1;
+    if (!limit && dp[pos][pre][lead] != -1)
+    {
+        return dp[pos][pre][lead];
+    }
+    int sup = limit ? v[pos] : 9;
+    int ans = 0;
+    for (int i = 0; i <= sup; i++)
+    {
+        if (!lead && (abs(i - pre) < 2))
+            continue;
+        ans += dfs(pos - 1, limit && i == sup, lead && i == 0, i);
+    }
+    if (!limit)
+    {
+        dp[pos][pre][lead] = ans;
+    }
+    return ans;
+}
+int cal(int x)
+{
+    if (x < 0)
+        return 0;
+    v.clear();
+    while (x)
+    {
+        v.emplace_back(x % 10);
+        x /= 10;
+    }
+    return dfs((int)v.size() - 1, 1, 1, 0);
+}
+```
+
 
 
 # 图论
@@ -1266,7 +1315,7 @@ int exgcd(int a, int b,int& x,int& y) {
 	y = t - a / b * x;
 	return d;
 }
-int output(int p, int q, int mod) {//exgcd求p/q%mod
+int frac(int p, int q, int mod) {//exgcd求p/q%mod
 	int x = 1, y = 1;
 	exgcd(q, mod, x, y);
 	return (p * (x + mod) % mod) % mod;
@@ -1285,7 +1334,7 @@ int qpow(int a, int b,int mod) {
 	}
 	return ans;
 }
-int output(int p, int q,int mod) {//费马小定理求p/q%mod
+int frac(int p, int q,int mod) {//费马小定理求p/q%mod
 	return p * qpow(q, mod-2, mod) % mod;
 }
 ```
