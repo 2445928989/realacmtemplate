@@ -167,92 +167,61 @@ void output(int l, int r) {
 }
 ```
 
-###### 堆
-
-```cpp
-template<typename T>
-struct SGheap {
-	T Node[MAXN];
-	int size;
-	bool flag;//0-大根堆 1-小根堆
-	void up(int ind) {
-		if (ind / 2 && (flag ? Node[ind] > Node[ind / 2] :Node[ind] < Node[ind / 2])) {
-			swap(Node[ind / 2], Node[ind]);
-			up(ind / 2);
-		}
-	}
-	T top() {
-		return Node[1];
-	}
-	void down(int ind) {
-		int t = ind;
-		if (2 * ind <= size && (flag ? Node[2 * ind] > Node[t]:Node[2 * ind] < Node[t]))t = 2 * ind;
-		if (2 * ind + 1 <= size && (flag ? Node[2 * ind + 1] > Node[t] : Node[2 * ind + 1] < Node[t]))t = 2 * ind + 1;
-		if (t != ind) {
-			swap(Node[ind], Node[t]);
-			down(t);
-		}
-	}
-	SGheap(bool _flag = 0) {
-		size = 0;
-		flag = _flag;
-	}
-	SGheap(T* A, int _size, bool _flag = 0) {
-		size = _size;
-		flag = _flag;
-		for (int i = 1; i <= _size; i++) {
-			Node[i] = A[i];
-		}
-		build_heap();
-	}
-	void build_heap() {//从下向上下沉可实现O(n)建堆
-		for (int i = size; i >= 1; i--) {
-			down(i);
-		}
-	}
-	void pop() {
-		Node[1] = Node[size--];
-		down(1);
-	}
-	void insert(int x) {
-		Node[++size] = x;
-		up(size);
-	}
-};
-//用法：
-//(1)SGheap<int> Heap(0);小根堆
-//(2)SGheap<int> Heap(num[],n,0)直接把数组传进去(下标从1开始)
-```
-
-
-
 ###### 树状数组
 
 ```cpp
-int sum[500010];
-int c[500010];
-int lowbit(int x) {
-	return x & -x;
-}
-void create() {//利用前缀和O(n)建树
-	for (int i = 1; i <= n; i++) {
-		c[i] = sum[i] - sum[i - lowbit(i)];
-	}
-}
-int getsum(int x) {
-	int sum = 0;
-	while (x) {
-		sum += c[x];
-		x = x - lowbit(x);
-	}
-	return sum;
-}
-void plusnum(int x, int k) {
-	while (x <= n) {
-		c[x] += k;
-		x = x + lowbit(x);
-	}
-}
+struct BIT
+{
+    vector<int> c;
+    int n;
+    inline int lowbit(int x)
+    {
+        return x & -x;
+    }
+    void init(vector<int> &v)
+    { // 利用前缀和O(n)建树
+        vector<int> pre(n + 1);
+        for (int i = 1; i <= n; i++)
+        {
+            pre[i] = pre[i - 1] + v[i];
+        }
+
+        for (int i = 1; i <= n; i++)
+        {
+            c[i] = pre[i] - pre[i - lowbit(i)];
+        }
+    }
+    int getsum(int r)
+    {
+        int sum = 0;
+        while (r)
+        {
+            sum += c[r];
+            r = r - lowbit(r);
+        }
+        return sum;
+    }
+    void update(int pos, int num)
+    {
+        while (pos <= n)
+        {
+            c[pos] += num;
+            pos = pos + lowbit(pos);
+        }
+    }
+    int query(int l, int r)
+    {
+        return getsum(r) - getsum(l - 1);
+    }
+    BIT() {}
+    BIT(int _n) : n(_n) {}
+    BIT(vector<int> &v)
+    {
+        n = v.size() - 1;
+        c.resize(n + 1);
+        init(v);
+    }
+};
 ```
 
 ###### 线段树
@@ -1235,16 +1204,41 @@ ll cantor() {
 ###### 线性筛
 
 ```cpp
-int prime[MAXN];
-int sz;
-bool visited[MAXN];
-for (int i = 2; i <= MAXN; i++) {
-	if (!visited[i]) prime[sz++] = i;
-	for (int j = 0; i*prime[j]<=MAXN&&j < sz; j++) {
-		visited[prime[j] * i]++;
-		if (i % prime[j] == 0)break;
-	}
-}
+struct EulerSieve{
+    vector<int> prime;
+    vector<int> v;
+    int n;
+    EulerSieve(int n):v(n+1){
+        this->n=n;
+        for(int i=2;i<=n;i++){
+            if(v[i]==0){
+                prime.push_back(i);
+                v[i]=i;
+            }
+            for(int &p:prime){
+                if(i*p>n) break;
+                v[i*p]=p;
+                if(i%p==0) break;
+            }
+        }
+    }
+    vector<int> getdiv(int x) const{
+        vector<int> _div(1,1);
+        while(x>1){
+            int d=v[x];
+            int l=0,r=_div.size();
+            while(x%d==0){
+                for(int k=l;k<r;k++){
+                    _div.push_back(_div[k]*d);
+                }
+                x/=d;
+                l=r;
+                r=_div.size();
+            }
+        }
+        return _div;
+    }
+};
 ```
 
 
